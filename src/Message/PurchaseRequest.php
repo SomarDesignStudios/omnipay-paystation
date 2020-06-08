@@ -91,8 +91,7 @@ class PurchaseRequest extends AbstractRequest
     public function sendData($data)
     {
         $postdata = http_build_query($data);
-        $httpRequest = $this->httpClient->post($this->getEndPoint($postdata), null, $postdata);
-        $httpResponse = $httpRequest->send();
+        $httpResponse = $this->httpClient->request('POST', $this->getEndPoint($postdata), null, $postdata);
 
         return $this->response = new PurchaseResponse($this, $httpResponse->getBody());
     }
@@ -104,7 +103,7 @@ class PurchaseRequest extends AbstractRequest
     protected function getCustomerDetails()
     {
         $card = $this->getCard();
-        return substr(implode(array_filter(array(
+        return substr(implode(",", array_filter(array(
             $card->getName(),
             $card->getCompany(),
             $card->getEmail(),
@@ -114,7 +113,7 @@ class PurchaseRequest extends AbstractRequest
             $card->getCity(),
             $card->getState(),
             $card->getCountry()
-        )), ","), 0, 255);
+        ))), 0, 255);
     }
 
     /**
