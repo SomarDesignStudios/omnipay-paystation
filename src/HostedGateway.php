@@ -6,7 +6,7 @@ use Omnipay\Common\AbstractGateway;
 
 class HostedGateway extends AbstractGateway
 {
-    
+
     public function getName()
     {
         return 'Paystation';
@@ -58,5 +58,15 @@ class HostedGateway extends AbstractGateway
     public function completePurchase(array $parameters = array())
     {
         return $this->createRequest('\Omnipay\Paystation\Message\CompletePurchaseRequest', $parameters);
+    }
+
+    public function createCard(array $parameters)
+    {
+        return $this->createRequest('\Omnipay\Paystation\Message\CreateCardRequest', $parameters);
+    }
+
+    public function completeCreateCard(array $parameters)
+    {
+        return $this->createRequest('\Omnipay\Paystation\Message\CompleteCreateCardRequest', $parameters);
     }
 }
