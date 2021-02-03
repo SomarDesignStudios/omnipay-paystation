@@ -34,7 +34,7 @@ class PurchaseResponse extends AbstractResponse implements RedirectResponseInter
 
     public function isSuccessful()
     {
-        return false;
+        return $this->request->isSavedCardPurchase() ? $this->getCode() === "0" : false;
     }
 
     public function isRedirect()

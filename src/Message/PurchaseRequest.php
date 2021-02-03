@@ -67,6 +67,12 @@ class PurchaseRequest extends AbstractRequest
         }
         $data['pstn_ms'] = $merchantSession;
 
+        if ($this->isSavedCardPurchase()) {
+            $data['pstn_nr'] = 't';
+            $data['pstn_2p'] = 't';
+            $data['pstn_fp'] = 't';
+        }
+
         return $data;
     }
 
@@ -79,10 +85,17 @@ class PurchaseRequest extends AbstractRequest
         //optional
         $data['pstn_cu'] = $this->getCurrency();
         $data['pstn_tm'] = $this->getTestMode() ? 'T' : null;
-        $data['pstn_mc'] = $this->getCustomerDetails();
+
+
         $data['pstn_mr'] = $this->getTransactionId();
         if ($this->getHmacKey() && $this->getReturnUrl()) {
             $data['pstn_du'] = urlencode($this->getReturnUrl());
+        }
+
+        if (!$this->isSavedCardPurchase()) {
+            $data['pstn_mc'] = $this->getCustomerDetails();
+        } else {
+            $data['pstn_ft'] = $this->getToken();
         }
 
         return $data;
@@ -129,7 +142,7 @@ class PurchaseRequest extends AbstractRequest
             $timestamp = time();
             $qd['pstn_HMACTimestamp'] = $timestamp;
             $qd['pstn_HMAC'] = $this->getHmac($timestamp, $postdata);
-            $url .= '?'.http_build_query($qd);
+            $url .= '?' . http_build_query($qd);
         }
 
         return $url;
@@ -146,9 +159,14 @@ class PurchaseRequest extends AbstractRequest
     {
         $authenticationKey = $this->getHmacKey();
         $hmacWebserviceName = 'paystation'; //webservice identification.
-        $hmacBody = pack('a*', $timestamp).pack('a*', $hmacWebserviceName).pack('a*', $postdata);
+        $hmacBody = pack('a*', $timestamp) . pack('a*', $hmacWebserviceName) . pack('a*', $postdata);
         $hmacHash = hash_hmac('sha512', $hmacBody, $authenticationKey);
 
         return $hmacHash;
+    }
+
+    public function isSavedCardPurchase()
+    {
+        return (bool) $this->getToken();
     }
 }
