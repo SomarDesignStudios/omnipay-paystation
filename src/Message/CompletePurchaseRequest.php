@@ -36,9 +36,37 @@ class CompletePurchaseRequest extends PurchaseRequest
 
     public function sendData($data)
     {
-        $postdata = http_build_query($data);
-        $httpResponse = $this->httpClient->request('POST', $this->getEndPoint($postdata), ['Content-Type' => 'application/x-www-form-urlencoded'], $postdata);
+        $httpResponse = $this->httpClient->request('GET', $this->getEndPoint($data));
 
         return $this->response = new CompletePurchaseResponse($this, $httpResponse->getBody());
+    }
+
+    /**
+     * Get the endpoint for this request.
+     * Will include hmac data in GET query, if necessary.
+     * @return string endpoint url
+     */
+    protected function getEndPoint($getData)
+    {
+        $url = $this->endpoint;
+        $qd = $getData;
+        if ($this->getHmacKey()) {
+            $timestamp = time();
+            $qd['pstn_HMACTimestamp'] = $timestamp;
+            $qd['pstn_HMAC'] = $this->getHmac($timestamp, '');
+        }
+        $url .= '?' . http_build_query($qd);
+
+        return $url;
+    }
+
+    public function getHmacKey()
+    {
+        $hmacKey = $this->getParameter('defaultHmacKey');
+
+        if (!$hmacKey) {
+            $hmacKey = $this->getParameter('hmacKey');
+        }
+        return $hmacKey;
     }
 }

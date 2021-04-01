@@ -55,6 +55,16 @@ class PurchaseRequest extends AbstractRequest
         return $this->setParameter('hmacKey', $value);
     }
 
+    public function getDefaultHmacKey()
+    {
+        return $this->getParameter('defaultHmacKey');
+    }
+
+    public function setDefaultHmacKey($value)
+    {
+        return $this->setParameter('defaultHmacKey', $value);
+    }
+
     protected function getBaseData()
     {
         $data = array();
